@@ -1,7 +1,7 @@
 # frontend/app.py
 
 import streamlit as st
-import requests
+from agent import run_agent_logic  # Directly use the function instead of calling backend
 
 st.title("📅 TailorTalk AI — Appointment Bot")
 
@@ -14,13 +14,13 @@ if user_input:
     st.session_state.messages.append(("user", user_input))
     
     try:
-        res = requests.post("http://localhost:8000/chat", json={"message": user_input})
-        reply = res.json()["reply"]
+        reply = run_agent_logic(user_input)
     except Exception as e:
-        reply = f"❌ Error contacting backend: {e}"
+        reply = f"❌ Error running agent: {e}"
     
     st.session_state.messages.append(("bot", reply))
 
 for sender, msg in st.session_state.messages:
     with st.chat_message(sender):
         st.markdown(msg)
+
