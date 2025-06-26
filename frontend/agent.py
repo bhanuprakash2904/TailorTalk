@@ -1,24 +1,18 @@
-# agent.py
-import os
-print("🛠 Current working directory:", os.getcwd())
-
+import streamlit as st
+import json
 from datetime import datetime, timedelta
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
-# Path to the downloaded credentials file
-SERVICE_ACCOUNT_FILE = "credentials.json"
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
-CALENDAR_ID = "primary"  # or your calendar ID
+CALENDAR_ID = "primary"
 
-# Authenticate
-creds = service_account.Credentials.from_service_account_file(
-    SERVICE_ACCOUNT_FILE, scopes=SCOPES
-)
+# Load credentials from Streamlit Secrets
+creds_dict = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
+creds = service_account.Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
 service = build("calendar", "v3", credentials=creds)
 
 def run_agent_logic(user_input: str) -> str:
-    # Simple logic to book "tomorrow at 3 PM"
     if "tomorrow" in user_input.lower():
         start_time = datetime.now() + timedelta(days=1)
         start_time = start_time.replace(hour=15, minute=0, second=0, microsecond=0)
@@ -38,3 +32,4 @@ def run_agent_logic(user_input: str) -> str:
             return f"❌ Failed to book meeting: {e}"
 
     return "Please mention a date like 'tomorrow' or 'next Friday'."
+
